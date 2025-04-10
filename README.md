@@ -121,7 +121,7 @@ Open an issue or contact me at my **[LinkedIn](https://www.linkedin.com/in/mmoku
 
 ---
 
-## ![WardroBuddy demo](https://raw.githubusercontent.com/Yukin3/Yukin3/refs/heads/main/asset/space.jpg)
+## ![WardroBuddy demo](https://raw.githubusercontent.com/Yukin3/WardroBuddy/refs/heads/master/imgs/IMG_7666.PNG)
 
 ## 📊 Project Insights
 
