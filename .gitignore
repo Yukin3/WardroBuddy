@@ -1,5 +1,10 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+# late files+folders
+data/
+creds/
+cheatsheets/
+
 # dependencies
 node_modules/
 
@@ -33,6 +38,7 @@ yarn-error.*
 
 # local env files
 .env*.local
+
 
 # typescript
 *.tsbuildinfo

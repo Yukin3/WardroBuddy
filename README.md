@@ -1,59 +1,134 @@
-# Outfitted
+# 👗 WardroBuddy
 
-Store your outfit, get feedback on wishlist items to prevent impulse spending and compatibility issues!
+WardroBuddy is your AI-powered wardrobe assistant designed to help you **manage your closet, plan outfits**, and **get smart recommendations** before you buy. Say goodbye to impulse shopping and fashion mismatches — our system gives you curated style advice based on your wardrobe, wishlist, and personal aesthetic.
 
-Technologies used include: Expo Go Framework, React Native, Firebase for auth and backend/storage, Open AI API, Nativewind CSS for styling
+### ✨ Key Features
 
-![image](https://github.com/user-attachments/assets/222f66b1-44ca-45a4-aa9c-03f98e00bff1)
+- Save and organize outfit photos
+- Get AI-based compatibility feedback before buying new clothes
+- Track your personal style and wishlist over time
+- Make better wardrobe decisions based on data
 
+---
 
-# Welcome to your Expo app 👋
+## 🛠️ Tech Stack
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+- **Expo Go** + **React Native** for cross-platform mobile app development
+- **Firebase** for authentication, backend, and cloud storage
+- **NativeWind CSS** for Tailwind styling principles
+- **OpenAI API** for fashion recommendation and style intelligence
+- **Keras** + **Tensor Flow** for deep-learning and similarity model
 
-## Get started
+---
 
-1. Install dependencies
+## 🚀 Getting Started
 
-   ```bash
-   npm install
-   ```
+### 1. Install dependencies
 
-2. Start the app
+```bash
+npm install
+```
 
-   ```bash
-    npx expo start
-   ```
+### 2. Start the development server
 
-In the output, you'll find options to open the app in a
+```bash
+npx expo start
+```
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+From here, you'll be able to launch the app in:
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- [Expo Go](https://expo.dev/go) on your mobile device
+- iOS/Android simulator
+- A development build
 
-## Get a fresh project
+---
 
-When you're ready, run:
+## ⚙️ Required Setup Before Running Locally
+
+To fully run WardroBuddy locally, you'll go through a few extra steps:
+
+### 🔐 1. Create a `.env` file
+
+Use the provided `.env.example` file and insert your Firebase API key:
+
+```env
+EXPO_PUBLIC_FIREBASE_API_KEY=replace-with-your-own-key
+```
+
+> This is used in `config/firebase.ts` to initialize Firebase securely.
+
+### 🔧 2. Replace Firebase Config
+
+Update the following in `config/firebase.ts` using your own Firebase project credentials:
+
+```ts
+const firebaseConfig = {
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+  authDomain: "your-project.firebaseapp.com",
+  projectId: "your-project-id",
+  storageBucket: "your-project.appspot.com",
+  messagingSenderId: "your-messaging-id",
+  appId: "your-app-id",
+  databaseURL: "your-database-url",
+};
+```
+
+You’ll need a Firebase project set up with **Authentication**, **Firestore**, and **Storage** enabled.
+
+> To use Firebase Storage you'll have to `upgrade` your account and include`billing info`.
+
+### 📱 3. Create an Expo account & download Expo Go
+
+- Sign up at [expo.dev](https://expo.dev)
+- Download [Expo Go](https://expo.dev/go) on your iOS/Android device
+- Log in to your Expo account via the CLI or Expo Go app
+
+---
+
+## 🧹 Resetting Project (Optional)
+
+To reset and start clean:
 
 ```bash
 npm run reset-project
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+This will archive the starter files and create a blank slate in the `app/` directory.
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+## 📚 Learn More
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- [Expo Docs](https://docs.expo.dev/)
+- [Firebase Docs](https://firebase.google.com/docs/)
+- [React Native Docs](https://reactnative.dev/docs/getting-started)
+- [OpenAI Docs](https://platform.openai.com/docs)
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
+## 🌐 Join the Community
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- [Expo on GitHub](https://github.com/expo/expo)
+- [Expo Discord](https://chat.expo.dev)
+
+---
+
+## 💌 Contact
+
+Have ideas, feedback, or want to contribute?
+
+Open an issue or contact me at my **[LinkedIn](https://www.linkedin.com/in/mmokutu/)**.
+
+---
+
+## ![WardroBuddy demo](https://raw.githubusercontent.com/Yukin3/Yukin3/refs/heads/main/asset/space.jpg)
+
+## 📊 Project Insights
+
+Upcoming
+
+```
+
+---
+
+```

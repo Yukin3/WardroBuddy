@@ -12,11 +12,16 @@ import React, {
 import { Image } from "react-native";
 import { useState, useEffect } from "react";
 import { router } from "expo-router";
-import { auth, storage } from "../config/firebase";
-import { getUserOutfitsFromStorage, Outfit } from "../utils/firebase";
+import { auth, storage } from "@/config/firebase";
+import { getUserOutfitsFromStorage, Outfit } from "@/utils/firebase";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { ref, listAll, getDownloadURL } from "firebase/storage";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
+import { useResponsive } from "@/hooks/useResponsive";
+import ResponsiveContainer from "@/components/ResponsiveContainer";
+import ResponsiveGrid from "@/components/ResponsiveGrid";
+import TwoColumnLayout from "@/components/TwoColumnLayout";
 
 interface ButtonProps {
   label: string;
@@ -58,6 +63,19 @@ export default function Index() {
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [loadingWishlist, setLoadingWishlist] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const {
+    getBackgroundClass,
+    getCardBackgroundClass,
+    getCardBorderClass,
+    getHeaderTextClass,
+    getTextClass,
+    getSubtitleTextClass,
+    getEmptyStateIconClass,
+    getPrimaryButtonClass,
+    getPrimaryIconColor,
+    isDark
+  } = useThemeStyles();
+  const { isMobile, isTablet, isDesktop } = useResponsive();
 
   const loadOutfits = async () => {
     try {
@@ -191,138 +209,455 @@ export default function Index() {
   };
 
   return (
-    <View className="flex-1 bg-emerald-50">
+    <View className={`flex-1 ${getBackgroundClass()}`}>
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={{ 
+          paddingBottom: 20,
+          paddingTop: isMobile ? 0 : 16
+        }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#059669"
-            colors={["#059669"]}
+            tintColor={getPrimaryIconColor()}
+            colors={[getPrimaryIconColor()]}
           />
         }
       >
-        {/* recommendations section */}
-        <View className="px-4 py-6 space-y-4">
-          <View className="space-y-1">
-            <Text className="text-xl font-bold text-emerald-800">
-              Recommendations
-            </Text>
-            <Text className="text-emerald-600 text-sm">
-              Based on your wishlist
-            </Text>
-          </View>
-
-          {loadingWishlist ? (
-            <View className="items-center py-8">
-              <ActivityIndicator size="large" color="#059669" />
-              <Text className="text-emerald-600 mt-2">Loading wishlist...</Text>
-            </View>
-          ) : wishlistItems.length === 0 ? (
-            <TouchableOpacity
-              onPress={navigateToAddWishlist}
-              className="bg-white rounded-2xl p-6 shadow-sm items-center"
-            >
-              <View className="w-16 h-16 bg-emerald-100 rounded-full items-center justify-center mb-4">
-                <Ionicons name="heart-outline" size={32} color="#059669" />
-              </View>
-              <Text className="text-emerald-700 text-lg font-semibold text-center mb-2">
-                Add Your First Wishlist Item
+        <ResponsiveContainer>
+          {/* Welcome section for desktop */}
+          {!isMobile && (
+            <View className="px-4 mb-6">
+              <Text className={`${getHeaderTextClass()} text-3xl font-bold mb-2`}>
+                Welcome back
               </Text>
-              <Text className="text-emerald-600 text-center mb-4">
-                Start building your wishlist to get personalized recommendations
+              <Text className={`${getSubtitleTextClass()} text-lg`}>
+                Here's what's happening with your wardrobe today
               </Text>
-              <View className="bg-emerald-600 px-6 py-3 rounded-xl">
-                <Text className="text-white font-semibold">Get Started →</Text>
-              </View>
-            </TouchableOpacity>
-          ) : (
-            <View className="space-y-4">
-              {wishlistItems.slice(0, 2).map((item) => (
-                <TouchableOpacity
-                  key={item.id}
-                  onPress={() => navigateToWishlistItem(item.id)}
-                  className="bg-white rounded-2xl p-3 shadow-sm"
-                >
-                  <Image
-                    source={{ uri: item.imageUrl }}
-                    className="w-full h-40 rounded-xl"
-                    resizeMode="cover"
-                  />
-                  <View className="p-2">
-                    <Text className="text-emerald-700 font-semibold text-lg mb-1">
-                      {item.name}
-                    </Text>
-                    {item.notes && (
-                      <Text className="text-gray-600 text-sm" numberOfLines={2}>
-                        {item.notes}
-                      </Text>
-                    )}
-                  </View>
-                </TouchableOpacity>
-              ))}
             </View>
           )}
-        </View>
 
-        <View className="px-4 py-6 space-y-4">
-          <Text className="text-xl font-bold text-emerald-800">
-            Your Outfits
-          </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            className="flex-1"
-            contentContainerStyle={{ paddingRight: 16 }}
-          >
-            <View className="flex-row">
-              {loading ? (
-                <View className="items-center justify-center p-4">
-                  <Text className="text-emerald-600">Loading outfits...</Text>
-                </View>
-              ) : outfits.length > 0 ? (
-                <>
-                  {outfits.slice(0, 5).map((outfit) => (
-                    <View key={outfit.id} className="mr-4">
-                      <Image
-                        source={{ uri: outfit.imageUrl }}
-                        className="w-24 h-64 rounded-2xl"
-                        resizeMode="cover"
-                      />
+          {isDesktop ? (
+            // Desktop layout with two columns
+            <TwoColumnLayout
+              left={
+                <View className="p-2">
+                  {/* Recommendations section */}
+                  <View className="px-4 py-4 mb-4">
+                    <View className="flex-row items-center justify-between mb-4">
+                      <View>
+                        <Text className={`${getHeaderTextClass()} text-xl font-bold`}>
+                          Recommendations
+                        </Text>
+                        <Text className={`${getSubtitleTextClass()} text-sm`}>
+                          Based on your wishlist
+                        </Text>
+                      </View>
+                      <TouchableOpacity
+                        onPress={navigateToAddWishlist}
+                        className="flex-row items-center"
+                      >
+                        <Text className={`${getHeaderTextClass()} mr-1`}>View All</Text>
+                        <Ionicons name="chevron-forward" size={16} color={isDark ? "#4ADE80" : "#059669"} />
+                      </TouchableOpacity>
                     </View>
-                  ))}
-                  <TouchableOpacity
-                    className="w-24 h-64 rounded-2xl bg-emerald-100 justify-center items-center mr-4"
-                    onPress={navigateToOutfits}
-                  >
-                    <Text className="text-emerald-700 font-semibold text-center text-base">
-                      See all outfits →
+
+                    {loadingWishlist ? (
+                      <ActivityIndicator size="large" color={getPrimaryIconColor()} />
+                    ) : wishlistItems.length === 0 ? (
+                      <View
+                        className={`${getCardBackgroundClass()} rounded-xl p-6 shadow-sm border ${getCardBorderClass()} items-center`}
+                      >
+                        <View className={`w-16 h-16 ${getEmptyStateIconClass()} rounded-full items-center justify-center mb-4`}>
+                          <Ionicons name="heart-outline" size={32} color={getPrimaryIconColor()} />
+                        </View>
+                        <Text className={`${getHeaderTextClass()} text-lg font-semibold text-center mb-2`}>
+                          Add Your First Wishlist Item
+                        </Text>
+                        <Text className={`${getSubtitleTextClass()} text-center mb-4`}>
+                          Start building your wishlist to get personalized recommendations
+                        </Text>
+                        <TouchableOpacity
+                          className={`${getPrimaryButtonClass()} px-6 py-3 rounded-xl`}
+                          onPress={navigateToAddWishlist}
+                        >
+                          <Text className="text-white font-semibold">Get Started</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
+                      <ResponsiveGrid numColumns={2} gap={16}>
+                        {wishlistItems.slice(0, 4).map((item) => (
+                          <TouchableOpacity
+                            key={item.id}
+                            onPress={() => navigateToWishlistItem(item.id)}
+                            className={`${getCardBackgroundClass()} border ${getCardBorderClass()} rounded-xl shadow-sm overflow-hidden mb-4`}
+                          >
+                            <Image
+                              source={{ uri: item.imageUrl }}
+                              className="w-full h-40"
+                              resizeMode="cover"
+                            />
+                            <View className="p-3">
+                              <Text className={`${getTextClass()} font-semibold text-lg mb-1`} numberOfLines={1}>
+                                {item.name}
+                              </Text>
+                              {item.notes && (
+                                <Text className={`${getSubtitleTextClass()} text-sm`} numberOfLines={2}>
+                                  {item.notes}
+                                </Text>
+                              )}
+                            </View>
+                          </TouchableOpacity>
+                        ))}
+                      </ResponsiveGrid>
+                    )}
+                  </View>
+                </View>
+              }
+              right={
+                <View className="p-2">
+                  {/* Outfits section */}
+                  <View className="px-4 py-4">
+                    <View className="flex-row items-center justify-between mb-4">
+                      <View>
+                        <Text className={`${getHeaderTextClass()} text-xl font-bold`}>
+                          Recent Outfits
+                        </Text>
+                        <Text className={`${getSubtitleTextClass()} text-sm`}>
+                          From your closet
+                        </Text>
+                      </View>
+                      <TouchableOpacity
+                        onPress={navigateToOutfits}
+                        className="flex-row items-center"
+                      >
+                        <Text className={`${getHeaderTextClass()} mr-1`}>See All</Text>
+                        <Ionicons name="chevron-forward" size={16} color={isDark ? "#4ADE80" : "#059669"} />
+                      </TouchableOpacity>
+                    </View>
+
+                    {loading ? (
+                      <ActivityIndicator size="large" color={getPrimaryIconColor()} />
+                    ) : outfits.length === 0 ? (
+                      <View
+                        className={`${getCardBackgroundClass()} border ${getCardBorderClass()} rounded-xl p-6 shadow-sm items-center`}
+                      >
+                        <View className={`w-16 h-16 ${getEmptyStateIconClass()} rounded-full items-center justify-center mb-4`}>
+                          <Ionicons name="shirt-outline" size={32} color={getPrimaryIconColor()} />
+                        </View>
+                        <Text className={`${getHeaderTextClass()} text-lg font-semibold text-center mb-2`}>
+                          Create Your First Outfit
+                        </Text>
+                        <Text className={`${getSubtitleTextClass()} text-center mb-4`}>
+                          Start building your digital closet by creating an outfit
+                        </Text>
+                        <TouchableOpacity
+                          className={`${getPrimaryButtonClass()} px-6 py-3 rounded-xl`}
+                          onPress={navigateToCreate}
+                        >
+                          <Text className="text-white font-semibold">Create Now</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
+                      <ResponsiveGrid numColumns={2} gap={16}>
+                        {outfits.slice(0, 4).map((outfit) => (
+                          <TouchableOpacity
+                            key={outfit.id}
+                            onPress={() => {}}
+                            className={`${getCardBackgroundClass()} border ${getCardBorderClass()} rounded-xl shadow-sm overflow-hidden mb-4`}
+                          >
+                            <Image
+                              source={{ uri: outfit.imageUrl }}
+                              className="w-full h-40"
+                              resizeMode="cover"
+                            />
+                            <View className="p-3">
+                              <Text className={`${getTextClass()} font-semibold`} numberOfLines={1}>
+                                {outfit.details?.split('\n')[0] || "New Outfit"}
+                              </Text>
+                              <Text className={`${getSubtitleTextClass()} text-xs mt-1`}>
+                                {new Date(outfit.createdAt).toLocaleDateString()}
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        ))}
+                      </ResponsiveGrid>
+                    )}
+                  </View>
+                </View>
+              }
+            />
+          ) : isTablet ? (
+            // Tablet layout with responsive grid
+            <>
+              {/* Recommendations section */}
+              <View className="px-4 py-6 space-y-4">
+                <View className="flex-row items-center justify-between">
+                  <View>
+                    <Text className={`${getHeaderTextClass()} text-xl font-bold`}>
+                      Recommendations
                     </Text>
+                    <Text className={`${getSubtitleTextClass()} text-sm`}>
+                      Based on your wishlist
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={navigateToAddWishlist}
+                    className="flex-row items-center"
+                  >
+                    <Text className={`${getHeaderTextClass()} mr-1`}>View All</Text>
+                    <Ionicons name="chevron-forward" size={16} color={isDark ? "#4ADE80" : "#059669"} />
                   </TouchableOpacity>
-                </>
-              ) : (
-                <TouchableOpacity
-                  className="w-48 h-64 rounded-2xl bg-emerald-100 justify-center items-center p-4 mr-4"
-                  onPress={navigateToCreate}
-                >
-                  <Ionicons
-                    name="add-circle-outline"
-                    size={32}
-                    color="#059669"
-                  />
-                  <Text className="text-emerald-700 font-semibold text-center mt-2 text-base">
-                    Create your first outfit
+                </View>
+
+                {loadingWishlist ? (
+                  <View className="items-center py-8">
+                    <ActivityIndicator size="large" color={getPrimaryIconColor()} />
+                    <Text className={`${getSubtitleTextClass()} mt-2`}>Loading wishlist...</Text>
+                  </View>
+                ) : wishlistItems.length === 0 ? (
+                  <TouchableOpacity
+                    onPress={navigateToAddWishlist}
+                    className={`${getCardBackgroundClass()} rounded-xl p-6 shadow-sm border ${getCardBorderClass()} items-center`}
+                  >
+                    <View className={`w-16 h-16 ${getEmptyStateIconClass()} rounded-full items-center justify-center mb-4`}>
+                      <Ionicons name="heart-outline" size={32} color={getPrimaryIconColor()} />
+                    </View>
+                    <Text className={`${getHeaderTextClass()} text-lg font-semibold text-center mb-2`}>
+                      Add Your First Wishlist Item
+                    </Text>
+                    <Text className={`${getSubtitleTextClass()} text-center mb-4`}>
+                      Start building your wishlist to get personalized recommendations
+                    </Text>
+                    <View className={`${getPrimaryButtonClass()} px-6 py-3 rounded-xl`}>
+                      <Text className="text-white font-semibold">Get Started →</Text>
+                    </View>
+                  </TouchableOpacity>
+                ) : (
+                  <ResponsiveGrid numColumns={3} gap={16}>
+                    {wishlistItems.slice(0, 6).map((item) => (
+                      <TouchableOpacity
+                        key={item.id}
+                        onPress={() => navigateToWishlistItem(item.id)}
+                        className={`${getCardBackgroundClass()} border ${getCardBorderClass()} rounded-xl p-3 shadow-sm`}
+                      >
+                        <Image
+                          source={{ uri: item.imageUrl }}
+                          className="w-full h-36 rounded-lg mb-2"
+                          resizeMode="cover"
+                        />
+                        <Text className={`${getTextClass()} font-semibold text-lg mb-1`}>
+                          {item.name}
+                        </Text>
+                        {item.notes && (
+                          <Text className={`${getTextClass()} text-gray-600 text-sm`} numberOfLines={2}>
+                            {item.notes}
+                          </Text>
+                        )}
+                      </TouchableOpacity>
+                    ))}
+                  </ResponsiveGrid>
+                )}
+              </View>
+
+              {/* Outfits section */}
+              <View className="px-4 pb-6 space-y-4">
+                <View className="flex-row justify-between items-center">
+                  <View>
+                    <Text className={`${getHeaderTextClass()} text-xl font-bold`}>
+                      Recent Outfits
+                    </Text>
+                    <Text className={`${getSubtitleTextClass()} text-sm`}>
+                      From your closet
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={navigateToOutfits}
+                    className="flex-row items-center"
+                  >
+                    <Text className={`${getHeaderTextClass()} mr-1`}>See All</Text>
+                    <Ionicons name="chevron-forward" size={16} color={isDark ? "#4ADE80" : "#059669"} />
+                  </TouchableOpacity>
+                </View>
+
+                {loading ? (
+                  <View className="items-center py-8">
+                    <ActivityIndicator size="large" color={getPrimaryIconColor()} />
+                    <Text className={`${getSubtitleTextClass()} mt-2`}>Loading outfits...</Text>
+                  </View>
+                ) : outfits.length === 0 ? (
+                  <TouchableOpacity
+                    onPress={navigateToCreate}
+                    className={`${getCardBackgroundClass()} border ${getCardBorderClass()} rounded-xl p-6 shadow-sm items-center`}
+                  >
+                    <View className={`w-16 h-16 ${getEmptyStateIconClass()} rounded-full items-center justify-center mb-4`}>
+                      <Ionicons name="shirt-outline" size={32} color={getPrimaryIconColor()} />
+                    </View>
+                    <Text className={`${getHeaderTextClass()} text-lg font-semibold text-center mb-2`}>
+                      Create Your First Outfit
+                    </Text>
+                    <Text className={`${getSubtitleTextClass()} text-center mb-4`}>
+                      Start building your digital closet by creating an outfit
+                    </Text>
+                    <View className={`${getPrimaryButtonClass()} px-6 py-3 rounded-xl`}>
+                      <Text className="text-white font-semibold">Create Now →</Text>
+                    </View>
+                  </TouchableOpacity>
+                ) : (
+                  <ResponsiveGrid numColumns={3} gap={16}>
+                    {outfits.slice(0, 6).map((outfit) => (
+                      <TouchableOpacity
+                        key={outfit.id}
+                        onPress={() => {}}
+                        className={`${getCardBackgroundClass()} border ${getCardBorderClass()} rounded-xl shadow-sm overflow-hidden`}
+                      >
+                        <Image
+                          source={{ uri: outfit.imageUrl }}
+                          className="w-full h-40"
+                          resizeMode="cover"
+                        />
+                        <View className="p-3">
+                          <Text className={`${getTextClass()} font-semibold`}>
+                            {outfit.details?.split('\n')[0] || "New Outfit"}
+                          </Text>
+                          <Text className={`${getSubtitleTextClass()} text-xs mt-1`}>
+                            {new Date(outfit.createdAt).toLocaleDateString()}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </ResponsiveGrid>
+                )}
+              </View>
+            </>
+          ) : (
+            // Existing mobile layout
+            <>
+              {/* recommendations section */}
+              <View className="px-4 py-6 space-y-4">
+                <View className="space-y-1">
+                  <Text className={`text-xl font-bold ${getHeaderTextClass()}`}>
+                    Recommendations
                   </Text>
-                  <Text className="text-emerald-600 text-center mt-1 text-sm">
-                    Tap to get started →
+                  <Text className={`${getSubtitleTextClass()} text-sm`}>
+                    Based on your wishlist
                   </Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          </ScrollView>
-        </View>
+                </View>
+
+                {loadingWishlist ? (
+                  <View className="items-center py-8">
+                    <ActivityIndicator size="large" color={getPrimaryIconColor()} />
+                    <Text className={`${getSubtitleTextClass()} mt-2`}>Loading wishlist...</Text>
+                  </View>
+                ) : wishlistItems.length === 0 ? (
+                  <TouchableOpacity
+                    onPress={navigateToAddWishlist}
+                    className={`${getCardBackgroundClass()} rounded-2xl p-6 shadow-sm border ${getCardBorderClass()} items-center`}
+                  >
+                    <View className={`w-16 h-16 ${getEmptyStateIconClass()} rounded-full items-center justify-center mb-4`}>
+                      <Ionicons name="heart-outline" size={32} color={getPrimaryIconColor()} />
+                    </View>
+                    <Text className={`${getHeaderTextClass()} text-lg font-semibold text-center mb-2`}>
+                      Add Your First Wishlist Item
+                    </Text>
+                    <Text className={`${getSubtitleTextClass()} text-center mb-4`}>
+                      Start building your wishlist to get personalized recommendations
+                    </Text>
+                    <View className={`${getPrimaryButtonClass()} px-6 py-3 rounded-xl`}>
+                      <Text className="text-white font-semibold">Get Started →</Text>
+                    </View>
+                  </TouchableOpacity>
+                ) : (
+                  <View className="space-y-4">
+                    {wishlistItems.slice(0, 2).map((item) => (
+                      <TouchableOpacity
+                        key={item.id}
+                        onPress={() => navigateToWishlistItem(item.id)}
+                        className={`${getCardBackgroundClass()} border ${getCardBorderClass()} rounded-2xl p-3 shadow-sm`}
+                      >
+                        <Image
+                          source={{ uri: item.imageUrl }}
+                          style={{ width: "100%", height: 200 }}
+                          resizeMode="cover"
+                          className="rounded-xl mb-2"
+                        />
+                        <View className="p-2">
+                          <Text className={`${getTextClass()} font-semibold text-lg mb-1`}>
+                            {item.name}
+                          </Text>
+                          {item.notes && (
+                            <Text className={`${getTextClass()} text-gray-600 text-sm`} numberOfLines={2}>
+                              {item.notes}
+                            </Text>
+                          )}
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </View>
+
+              {/* outfits section */}
+              <View className="px-4 pb-6 space-y-4">
+                <View className="flex-row justify-between items-center">
+                  <View>
+                    <Text className={`text-xl font-bold ${getHeaderTextClass()}`}>
+                      Recent Outfits
+                    </Text>
+                    <Text className={`${getSubtitleTextClass()} text-sm`}>
+                      From your closet
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={navigateToOutfits}
+                    className="flex-row items-center"
+                  >
+                    <Text className={`${getHeaderTextClass()} mr-1`}>See All</Text>
+                    <Ionicons name="chevron-forward" size={16} color={isDark ? "#4ADE80" : "#059669"} />
+                  </TouchableOpacity>
+                </View>
+
+                {loading ? (
+                  <View className="items-center py-8">
+                    <ActivityIndicator size="large" color={getPrimaryIconColor()} />
+                    <Text className={`${getSubtitleTextClass()} mt-2`}>Loading outfits...</Text>
+                  </View>
+                ) : outfits.length === 0 ? (
+                  <TouchableOpacity
+                    onPress={navigateToCreate}
+                    className={`${getCardBackgroundClass()} border ${getCardBorderClass()} rounded-2xl p-6 shadow-sm items-center`}
+                  >
+                    <View className={`w-16 h-16 ${getEmptyStateIconClass()} rounded-full items-center justify-center mb-4`}>
+                      <Ionicons name="shirt-outline" size={32} color={getPrimaryIconColor()} />
+                    </View>
+                    <Text className={`${getHeaderTextClass()} text-lg font-semibold text-center mb-2`}>
+                      Create Your First Outfit
+                    </Text>
+                    <Text className={`${getSubtitleTextClass()} text-center mb-4`}>
+                      Start building your digital closet by creating an outfit
+                    </Text>
+                    <View className={`${getPrimaryButtonClass()} px-6 py-3 rounded-xl`}>
+                      <Text className="text-white font-semibold">Create Now →</Text>
+                    </View>
+                  </TouchableOpacity>
+                ) : (
+                  <View className="space-y-4">
+                    {outfits.slice(0, 5).map((outfit) => (
+                      <View key={outfit.id} className="mr-4">
+                        <Image
+                          source={{ uri: outfit.imageUrl }}
+                          className="w-24 h-64 rounded-2xl"
+                          resizeMode="cover"
+                        />
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+            </>
+          )}
+        </ResponsiveContainer>
       </ScrollView>
     </View>
   );

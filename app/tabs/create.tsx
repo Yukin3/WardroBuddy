@@ -9,8 +9,8 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import { useState, useEffect } from "react";
-import { auth } from "../config/firebase";
-import { uploadImage } from "../utils/firebase";
+import { auth } from "@/config/firebase";
+import { uploadImage } from "@/utils/firebase";
 import { router } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Slider from "@react-native-community/slider";

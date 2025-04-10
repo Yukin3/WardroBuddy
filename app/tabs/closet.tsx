@@ -13,11 +13,14 @@ import {
   TextInput,
   ScrollView,
 } from "react-native";
-import { auth } from "../config/firebase";
-import { getUserOutfitsFromStorage, Outfit } from "../utils/firebase";
+import { auth } from "@/config/firebase";
+import { getUserOutfitsFromStorage, Outfit } from "@/utils/firebase";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
+import { useRouter } from "expo-router";
+import { useResponsive } from "@/hooks/useResponsive";
 
 // Separate component for outfit item to properly use hooks
 const OutfitItem = React.memo(
@@ -34,6 +37,7 @@ const OutfitItem = React.memo(
   }) => {
     const itemFadeAnim = useRef(new Animated.Value(0)).current;
     const itemScaleAnim = useRef(new Animated.Value(0.9)).current;
+    const { getCardBackgroundClass, getCardBorderClass, getTextClass, getHeaderTextClass, isDark } = useThemeStyles();
 
     useEffect(() => {
       const delay = index * 100;
@@ -57,7 +61,7 @@ const OutfitItem = React.memo(
 
     return (
       <Animated.View
-        className="mb-4 rounded-2xl overflow-hidden bg-white shadow-md border border-emerald-100"
+        className={`mb-4 rounded-2xl overflow-hidden ${getCardBackgroundClass()} shadow-md border ${getCardBorderClass()}`}
         style={{
           width: itemWidth,
           marginLeft: index % 2 === 0 ? 0 : gap,
@@ -74,19 +78,19 @@ const OutfitItem = React.memo(
         </View>
         <View className="p-3">
           {item.details && (
-            <Text className="text-gray-700 text-sm mb-2" numberOfLines={2}>
+            <Text className={`${getTextClass()} text-sm mb-2`} numberOfLines={2}>
               {item.details}
             </Text>
           )}
           {item.genre && (
-            <View className="bg-emerald-100 px-3 py-1 rounded-full mb-2 self-start">
-              <Text className="text-emerald-700 text-xs font-medium">
+            <View className={`${isDark ? 'bg-emerald-900' : 'bg-emerald-100'} px-3 py-1 rounded-full mb-2 self-start`}>
+              <Text className={`${isDark ? 'text-emerald-400' : 'text-emerald-700'} text-xs font-medium`}>
                 {item.genre}
               </Text>
             </View>
           )}
           <View className="flex-row justify-between items-center">
-            <Text className="text-gray-500 text-xs">
+            <Text className={`${isDark ? 'text-gray-400' : 'text-gray-500'} text-xs`}>
               {item.date
                 ? new Date(item.date).toLocaleDateString()
                 : new Date(item.createdAt).toLocaleDateString()}
@@ -94,7 +98,7 @@ const OutfitItem = React.memo(
             {item.rating && (
               <View className="flex-row items-center">
                 <Text className="text-amber-500 text-xs mr-1">★</Text>
-                <Text className="text-gray-600 text-xs font-medium">
+                <Text className={`${getTextClass()} text-xs font-medium`}>
                   {item.rating}/10
                 </Text>
               </View>
@@ -118,12 +122,27 @@ export default function ClosetScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
   const headerAnim = useRef(new Animated.Value(0)).current;
+  const { 
+    getBackgroundClass, 
+    getCardBackgroundClass, 
+    getCardBorderClass, 
+    getTextClass,
+    getHeaderTextClass,
+    getSubtitleTextClass,
+    getInputBackgroundClass,
+    getPrimaryIconColor,
+    getSecondaryButtonClass,
+    getEmptyStateIconClass,
+    isDark
+  } = useThemeStyles();
+  const router = useRouter();
+  const { screenWidth, horizontalPadding, gridColumns, isMobile, isTablet, isDesktop } = useResponsive();
 
-  const { width } = Dimensions.get("window");
-  const numColumns = 2;
-  const gap = 12;
-  const padding = 16;
-  const itemWidth = (width - padding * 2 - gap) / numColumns;
+  // Responsive calculations
+  const padding = horizontalPadding;
+  const gap = isMobile ? 12 : isTablet ? 16 : 20;
+  const numColumns = gridColumns;
+  const itemWidth = (screenWidth - padding * 2 - gap * (numColumns - 1)) / numColumns;
 
   const loadOutfits = async () => {
     try {
@@ -225,16 +244,24 @@ export default function ClosetScreen() {
   };
 
   const renderOutfit = ({ item, index }: { item: Outfit; index: number }) => {
+    // Recalculate index for grid layout based on number of columns
+    const adjustedIndex = index % numColumns;
+    
     return (
-      <OutfitItem item={item} index={index} itemWidth={itemWidth} gap={gap} />
+      <OutfitItem 
+        item={item} 
+        index={index} 
+        itemWidth={itemWidth} 
+        gap={gap} 
+      />
     );
   };
 
   if (loading) {
     return (
-      <View className="flex-1 bg-emerald-50 items-center justify-center">
-        <ActivityIndicator size="large" color="#059669" />
-        <Text className="text-emerald-700 mt-4 font-medium">
+      <View className={`flex-1 ${getBackgroundClass()} items-center justify-center`}>
+        <ActivityIndicator size="large" color={getPrimaryIconColor()} />
+        <Text className={`${getHeaderTextClass()} mt-4 font-medium`}>
           Loading your closet...
         </Text>
       </View>
@@ -243,202 +270,185 @@ export default function ClosetScreen() {
 
   if (error) {
     return (
-      <View className="flex-1 bg-emerald-50 items-center justify-center p-4">
-        <View className="bg-red-50 p-4 rounded-2xl border border-red-200 mb-4">
-          <Text className="text-red-600 text-center font-medium">{error}</Text>
+      <View className={`flex-1 ${getBackgroundClass()} items-center justify-center p-4`}>
+        <View className={`${isDark ? 'bg-red-900' : 'bg-red-50'} p-4 rounded-2xl border ${isDark ? 'border-red-800' : 'border-red-200'} mb-4`}>
+          <Text className={`${isDark ? 'text-red-400' : 'text-red-600'} text-center font-medium`}>{error}</Text>
         </View>
-        <Text className="text-emerald-600 text-center mb-4">
-          Pull down to refresh
+        <Text className={`${getSubtitleTextClass()} text-center mb-4`}>
+          Please try again or check your internet connection
         </Text>
         <TouchableOpacity
-          className="bg-emerald-600 px-4 py-2 rounded-xl shadow-sm"
-          onPress={loadOutfits}
+          className={`${getSecondaryButtonClass()} px-6 py-3 rounded-xl`}
+          onPress={() => {
+            setLoading(true);
+            loadOutfits();
+          }}
         >
-          <Text className="text-white font-medium">Try Again</Text>
+          <Text className={getHeaderTextClass()}>Retry</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View className="flex-1">
-      <LinearGradient
-        colors={["#f0fdf4", "#dcfce7", "#bbf7d0"]}
-        className="flex-1"
+    <View className={`flex-1 ${getBackgroundClass()}`}>
+      <Animated.View
+        className={`px-${padding/4} pt-4 pb-2`}
+        style={{
+          opacity: headerAnim,
+          transform: [{ translateY: headerAnim.interpolate({ inputRange: [0, 1], outputRange: [-20, 0] }) }],
+        }}
       >
-        {isOffline && (
-          <View className="bg-amber-50 p-4 mb-2 border-b border-amber-200">
-            <Text className="text-amber-600 text-center font-medium">
-              Having trouble connecting to the server. Some features may be
-              limited.
-            </Text>
-          </View>
-        )}
+        <Text className={`${getHeaderTextClass()} ${isDesktop ? 'text-3xl' : isTablet ? 'text-2xl' : 'text-2xl'} font-bold mb-2`}>
+          Your Closet
+        </Text>
 
-        {}
+        {/* Search and filter */}
+        <View className={`flex-row items-center mb-4 p-2 rounded-xl ${getInputBackgroundClass()}`}>
+          <Ionicons name="search" size={20} color={isDark ? "#6b7280" : "#9ca3af"} className="mr-2" />
+          <TextInput
+            placeholder="Search outfits..."
+            placeholderTextColor={isDark ? "#6b7280" : "#9ca3af"}
+            className={`flex-1 ${getTextClass()}`}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          {searchQuery !== "" && (
+            <TouchableOpacity onPress={() => setSearchQuery("")}>
+              <Ionicons name="close-circle" size={18} color={isDark ? "#6b7280" : "#9ca3af"} />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Sort options */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="mb-4"
+        >
+          <TouchableOpacity
+            className={`flex-row items-center mr-3 px-3 py-2 rounded-lg ${sortBy === "date" ? (isDark ? 'bg-emerald-900' : 'bg-emerald-100') : (isDark ? 'bg-gray-800' : 'bg-gray-100')}`}
+            onPress={() => {
+              setSortBy("date");
+              if (sortBy === "date") toggleSortOrder();
+            }}
+          >
+            <Ionicons
+              name={sortOrder === "desc" ? "calendar" : "calendar-outline"}
+              size={16}
+              color={sortBy === "date" ? (isDark ? "#4ADE80" : "#059669") : (isDark ? "#9ca3af" : "#6b7280")}
+              className="mr-1"
+            />
+            <Text className={`${sortBy === "date" ? (isDark ? 'text-emerald-400' : 'text-emerald-700') : getSubtitleTextClass()} text-sm font-medium`}>
+              Date {sortBy === "date" && (sortOrder === "desc" ? "↓" : "↑")}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className={`flex-row items-center mr-3 px-3 py-2 rounded-lg ${sortBy === "rating" ? (isDark ? 'bg-emerald-900' : 'bg-emerald-100') : (isDark ? 'bg-gray-800' : 'bg-gray-100')}`}
+            onPress={() => {
+              setSortBy("rating");
+              if (sortBy === "rating") toggleSortOrder();
+            }}
+          >
+            <Ionicons
+              name={sortOrder === "desc" ? "star" : "star-outline"}
+              size={16}
+              color={sortBy === "rating" ? (isDark ? "#4ADE80" : "#059669") : (isDark ? "#9ca3af" : "#6b7280")}
+              className="mr-1"
+            />
+            <Text className={`${sortBy === "rating" ? (isDark ? 'text-emerald-400' : 'text-emerald-700') : getSubtitleTextClass()} text-sm font-medium`}>
+              Rating {sortBy === "rating" && (sortOrder === "desc" ? "↓" : "↑")}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className={`flex-row items-center mr-3 px-3 py-2 rounded-lg ${sortBy === "genre" ? (isDark ? 'bg-emerald-900' : 'bg-emerald-100') : (isDark ? 'bg-gray-800' : 'bg-gray-100')}`}
+            onPress={() => {
+              setSortBy("genre");
+              if (sortBy === "genre") toggleSortOrder();
+            }}
+          >
+            <Ionicons
+              name={sortOrder === "desc" ? "bookmark" : "bookmark-outline"}
+              size={16}
+              color={sortBy === "genre" ? (isDark ? "#4ADE80" : "#059669") : (isDark ? "#9ca3af" : "#6b7280")}
+              className="mr-1"
+            />
+            <Text className={`${sortBy === "genre" ? (isDark ? 'text-emerald-400' : 'text-emerald-700') : getSubtitleTextClass()} text-sm font-medium`}>
+              Genre {sortBy === "genre" && (sortOrder === "desc" ? "↓" : "↑")}
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </Animated.View>
+
+      {outfits.length === 0 ? (
         <Animated.View
-          className="p-4 pb-0"
+          className={`flex-1 justify-center items-center p-6`}
           style={{
-            opacity: headerAnim,
-            transform: [
-              {
-                translateY: headerAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [-20, 0],
-                }),
-              },
-            ],
+            opacity: fadeAnim,
+            transform: [{ scale: scaleAnim }],
           }}
         >
-          <View className="flex-row items-center mb-4">
-            <View className="flex-1 flex-row items-center bg-white/80 backdrop-blur-sm rounded-xl border border-emerald-200 px-3 py-2 mr-2">
-              <Ionicons name="search" size={18} color="#065f46" />
-              <TextInput
-                className="flex-1 ml-2 text-gray-700"
-                placeholder="Search outfits..."
-                placeholderTextColor="#9CA3AF"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-              {searchQuery ? (
-                <TouchableOpacity onPress={() => setSearchQuery("")}>
-                  <Ionicons name="close-circle" size={18} color="#9CA3AF" />
-                </TouchableOpacity>
-              ) : null}
-            </View>
-            <TouchableOpacity
-              className="bg-white/80 backdrop-blur-sm w-10 h-10 rounded-xl border border-emerald-200 items-center justify-center"
-              onPress={toggleSortOrder}
-            >
-              <Ionicons
-                name={sortOrder === "asc" ? "arrow-up" : "arrow-down"}
-                size={18}
-                color="#065f46"
-              />
-            </TouchableOpacity>
+          <View className={`${getEmptyStateIconClass()} p-5 rounded-full mb-4`}>
+            <Ionicons name="shirt-outline" size={40} color={getPrimaryIconColor()} />
           </View>
-
-          <View className="flex-row mb-4">
-            <TouchableOpacity
-              className={`px-3 py-1.5 rounded-full mr-2 ${
-                sortBy === "date" ? "bg-emerald-600" : "bg-emerald-100"
-              }`}
-              onPress={() => setSortBy("date")}
-            >
-              <Text
-                className={`text-xs font-medium ${
-                  sortBy === "date" ? "text-white" : "text-emerald-700"
-                }`}
-              >
-                Date
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className={`px-3 py-1.5 rounded-full mr-2 ${
-                sortBy === "rating" ? "bg-emerald-600" : "bg-emerald-100"
-              }`}
-              onPress={() => setSortBy("rating")}
-            >
-              <Text
-                className={`text-xs font-medium ${
-                  sortBy === "rating" ? "text-white" : "text-emerald-700"
-                }`}
-              >
-                Rating
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className={`px-3 py-1.5 rounded-full ${
-                sortBy === "genre" ? "bg-emerald-600" : "bg-emerald-100"
-              }`}
-              onPress={() => setSortBy("genre")}
-            >
-              <Text
-                className={`text-xs font-medium ${
-                  sortBy === "genre" ? "text-white" : "text-emerald-700"
-                }`}
-              >
-                Genre
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <Text className={`${getHeaderTextClass()} ${isDesktop ? 'text-2xl' : isTablet ? 'text-xl' : 'text-xl'} font-bold text-center mb-2`}>
+            Your Closet is Empty
+          </Text>
+          <Text className={`${getSubtitleTextClass()} text-center mb-6`}>
+            Start adding outfits to build your digital closet
+          </Text>
+          <TouchableOpacity
+            onPress={() => router.push('/tabs/create')}
+            className={`${getSecondaryButtonClass()} py-3 px-6 rounded-xl`}
+          >
+            <Text className={`${getHeaderTextClass()} font-semibold`}>Create First Outfit</Text>
+          </TouchableOpacity>
         </Animated.View>
-
-        {outfits.length === 0 ? (
-          <View className="flex-1 items-center justify-center p-4">
-            <View className="w-24 h-24 bg-emerald-100 rounded-full items-center justify-center mb-4">
-              <Ionicons name="shirt-outline" size={40} color="#059669" />
-            </View>
-            <Text className="text-emerald-800 text-center text-xl mb-2 font-semibold">
-              Your Closet is Empty
-            </Text>
-            <Text className="text-emerald-600 text-center mb-6">
-              Upload some photos to see them here!
-            </Text>
-            <TouchableOpacity
-              className="bg-emerald-600 px-6 py-3 rounded-xl shadow-md shadow-emerald-200 flex-row items-center"
-              onPress={onRefresh}
-            >
-              <Ionicons
-                name="refresh"
-                size={18}
-                color="white"
-                className="mr-2"
-              />
-              <Text className="text-white font-semibold">Refresh</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
+      ) : (
+        <Animated.View 
+          style={{ 
+            flex: 1, 
+            opacity: fadeAnim,
+            transform: [{ translateY: fadeAnim.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }]
+          }}
+        >
           <FlatList
             data={getSortedOutfits()}
             renderItem={renderOutfit}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={{
-              padding: padding,
-              paddingBottom: padding + 20,
-            }}
             numColumns={numColumns}
-            columnWrapperStyle={{
-              justifyContent: "space-between",
-              marginBottom: gap,
+            key={numColumns.toString()} // Force re-render when number of columns changes
+            contentContainerStyle={{ 
+              paddingHorizontal: padding, 
+              paddingBottom: 20,
+              maxWidth: isDesktop ? 1140 : undefined,
+              alignSelf: isDesktop ? 'center' : undefined,
+              width: '100%'
             }}
+            columnWrapperStyle={numColumns > 1 ? { justifyContent: 'space-between' } : undefined}
+            showsVerticalScrollIndicator={false}
             refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
+              <RefreshControl 
+                refreshing={refreshing} 
                 onRefresh={onRefresh}
-                tintColor="#059669"
-                colors={["#059669"]}
+                tintColor={getPrimaryIconColor()}
+                colors={[getPrimaryIconColor()]}
               />
             }
-            showsVerticalScrollIndicator={false}
-            ListHeaderComponent={
-              <Animated.View
-                className="mb-6"
-                style={{
-                  opacity: headerAnim,
-                  transform: [
-                    {
-                      translateY: headerAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [20, 0],
-                      }),
-                    },
-                  ],
-                }}
-              >
-                <Text className="text-emerald-800 text-2xl font-bold mb-2">
-                  Your Closet
-                </Text>
-                <Text className="text-emerald-700 text-base">
-                  {getSortedOutfits().length}{" "}
-                  {getSortedOutfits().length === 1 ? "outfit" : "outfits"} in
-                  your collection
-                </Text>
-              </Animated.View>
+            ListEmptyComponent={
+              searchQuery ? (
+                <View className="py-8 items-center">
+                  <Text className={`${getSubtitleTextClass()} text-center`}>
+                    No outfits match your search
+                  </Text>
+                </View>
+              ) : null
             }
           />
-        )}
-      </LinearGradient>
+        </Animated.View>
+      )}
     </View>
   );
 }

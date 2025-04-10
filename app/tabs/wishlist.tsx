@@ -15,10 +15,10 @@ import {
   Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { auth, db, storage } from "../config/firebase";
+import { auth, db, storage } from "@/config/firebase";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { uploadImage } from "../utils/firebase";
+import { uploadImage } from "@/utils/firebase";
 import {
   collection,
   addDoc,

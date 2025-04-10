@@ -13,7 +13,7 @@ import {
   Animated,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { auth } from "./config/firebase";
+import { auth } from "@/config/firebase";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -22,6 +22,7 @@ import {
 } from "firebase/auth";
 import * as WebBrowser from "expo-web-browser";
 import { LinearGradient } from "expo-linear-gradient";
+
 
 // Initialize WebBrowser for auth session handling
 WebBrowser.maybeCompleteAuthSession();
@@ -43,11 +44,30 @@ export default function LandingScreen() {
     }).start();
   }, []);
 
-  const handleGoogleSignIn = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  // const handleGoogleSignIn = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     setError(null);
 
+  //     const provider = new GoogleAuthProvider();
+  //     const result = await signInWithPopup(auth, provider);
+  //     console.log("Google Sign In successful:", result.user);
+  //     router.replace("/tabs");
+  //   } catch (err: any) {
+  //     console.error("Google Sign In error:", err);
+  //     setError(err.message || "An error occurred during Google Sign In");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  const handleGoogleSignIn = async () => {
+    if (Platform.OS !== 'web') {
+      setError("Google sign-in only works on web in this version.");
+      return;
+    }
+  
+    try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       console.log("Google Sign In successful:", result.user);
@@ -111,7 +131,7 @@ export default function LandingScreen() {
             <View className="w-full max-w-sm space-y-8">
               <View className="items-center space-y-2">
                 <Text className="text-5xl font-bold text-emerald-800 mb-2">
-                  Welcome to Outfitted
+                  Welcome to WardroBuddy
                 </Text>
                 <Text className="text-emerald-700 text-center text-lg font-medium">
                   {isSignUp ? "Create your account" : "Sign in to your account"}

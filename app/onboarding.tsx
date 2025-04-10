@@ -11,8 +11,8 @@ import {
   Animated,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { useUserPreferences } from "./hooks/useUserPreferences";
-import { auth } from "./config/firebase";
+import { useUserPreferences } from "@/hooks/useUserPreferences"; // if onboarding.tsx is in /app
+import { auth } from "@/config/firebase";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -246,7 +246,7 @@ export default function OnboardingScreen() {
             <View className="space-y-2">
               <Text className="text-4xl font-bold text-emerald-800">
                 {currentStep === 1
-                  ? "Welcome to Outfittted!"
+                  ? "Welcome to WardroBuddy!"
                   : "Shopping Goals"}
               </Text>
               <Text className="text-emerald-700 text-lg font-medium">

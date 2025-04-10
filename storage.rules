@@ -27,14 +27,7 @@ service firebase.storage {
 
     // Rules for user's own data
     match /images/{userId}/{allPaths=**} {
-      allow read: if isAuthenticated() && isOwner(userId);
-      allow write: if isAuthenticated()
-        && isOwner(userId)
-        && isValidPath(userId)
-        && (
-          (request.resource.name.matches('.*/image\\.jpg') && isValidImage())
-          || (request.resource.name.matches('.*/metadata\\.json') && isValidMetadata())
-        );
+      allow read, write: if isAuthenticated() && isOwner(userId) && isValidPath(userId);
       allow delete: if isAuthenticated() && isOwner(userId);
     }
 
